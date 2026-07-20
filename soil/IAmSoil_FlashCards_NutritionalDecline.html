@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I Am Soil — Nutritional Decline Flash Cards</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,400&display=swap');
+
+  :root {
+    --soil:       #2D1B0E;
+    --bark:       #4A2E14;
+    --moss:       #2D5A1B;
+    --leaf:       #4A7C2F;
+    --sage:       #7DAF5A;
+    --mist:       #C8DFB0;
+    --parchment:  #F6F1E7;
+    --cream:      #FDFAF4;
+    --amber:      #B85C00;
+    --rust:       #8B2500;
+    --ink:        #1A1208;
+    --mid:        #5C4A35;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--soil);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--mist);
+    line-height: 1.1;
+  }
+  .header-left p {
+    color: var(--sage);
+    font-size: 0.92rem;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .header-badge {
+    background: var(--moss);
+    color: var(--mist);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    background: var(--bark);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .controls label {
+    color: var(--mist);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--sage);
+    color: var(--mist);
+    padding: 5px 14px;
+    border-radius: 2px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--moss);
+    border-color: var(--moss);
+  }
+  .count-badge {
+    margin-left: auto;
+    color: var(--sage);
+    font-size: 0.82rem;
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 32px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ── CARD FLIP ── */
+  .card-wrap {
+    perspective: 1000px;
+    height: 320px;
+    cursor: pointer;
+  }
+  .card-wrap.hidden { display: none; }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+  }
+  .card-wrap.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-front, .card-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* FRONT */
+  .card-front {
+    background: var(--cream);
+    border: 1px solid #c8bfa8;
+    box-shadow: 0 2px 12px rgba(45,27,14,0.10);
+  }
+  .card-front .card-stripe {
+    height: 6px;
+    flex-shrink: 0;
+  }
+  .card-front .card-body {
+    flex: 1;
+    padding: 22px 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card-category {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .nutrient-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    color: var(--soil);
+    line-height: 1.1;
+  }
+  .decline-figure {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .decline-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: var(--amber);
+    line-height: 1;
+  }
+  .decline-label {
+    font-size: 0.82rem;
+    color: var(--mid);
+    line-height: 1.3;
+    max-width: 140px;
+  }
+  .card-divider {
+    height: 1px;
+    background: #ddd5c2;
+    margin: 4px 0;
+  }
+  .what-it-does {
+    font-size: 0.88rem;
+    color: var(--mid);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .flip-hint {
+    padding: 10px 24px;
+    font-size: 0.75rem;
+    color: #9c8e7a;
+    font-style: italic;
+    border-top: 1px solid #ede5d4;
+    text-align: right;
+  }
+
+  /* BACK */
+  .card-back {
+    background: var(--moss);
+    transform: rotateY(180deg);
+  }
+  .card-back .back-header {
+    background: var(--soil);
+    padding: 14px 20px;
+    flex-shrink: 0;
+  }
+  .card-back .back-header h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--mist);
+    font-size: 1.2rem;
+  }
+  .card-back .back-header .back-sub {
+    color: var(--sage);
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  .card-back .symptoms {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: auto;
+  }
+  .symptom-group label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin-bottom: 4px;
+    opacity: 0.75;
+  }
+  .symptom-group p {
+    font-size: 0.84rem;
+    color: #d4efb8;
+    line-height: 1.5;
+  }
+  .source-line {
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.2);
+    font-size: 0.72rem;
+    color: var(--sage);
+    font-style: italic;
+    flex-shrink: 0;
+  }
+
+  /* Category colours */
+  .cat-mineral  { --cat: #7DAF5A; --cat-text: #2D5A1B; }
+  .cat-vitamin  { --cat: #C8A43B; --cat-text: #5C3A00; }
+  .cat-fatty    { --cat: #5A8FA0; --cat-text: #0D3040; }
+  .cat-protein  { --cat: #A0705A; --cat-text: #3A1200; }
+
+  .card-stripe { background: var(--cat); }
+  .card-category { color: var(--cat-text); }
+  .card-front  { border-top: 4px solid var(--cat); }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    body { background: white; }
+    header, .controls { display: none; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0;
+    }
+    .card-wrap {
+      height: auto;
+      page-break-inside: avoid;
+      cursor: default;
+      perspective: none;
+    }
+    .card-wrap.hidden { display: none; }
+    .card-inner { transform: none !important; transform-style: flat; position: static; height: auto; }
+    .card-front {
+      position: static;
+      height: auto;
+      border: 1px solid #ccc;
+      box-shadow: none;
+    }
+    .card-back { display: none; }
+    .flip-hint { display: none; }
+    .card-front .card-body { padding: 14px 16px 10px; }
+    .nutrient-name { font-size: 1.3rem; }
+    .decline-number { font-size: 1.8rem; }
+    .what-it-does { font-size: 0.82rem; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 20px; }
+    .controls { padding: 12px 20px; }
+    .grid { padding: 20px; gap: 16px; }
+    .card-wrap { height: 340px; }
+  }
+
+  .print-btn {
+    background: var(--leaf);
+    border: none;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 2px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .print-btn:hover { background: var(--moss); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>What's Missing From Our Food</h1>
+    <p>I Am Soil flash cards — nutritional decline, what it means for your health, and the evidence behind it</p>
+  </div>
+  <div class="header-badge">Team Briefing 2 · Facilitator Resource</div>
+</header>
+
+<div class="controls">
+  <label>Show:</label>
+  <button class="filter-btn active" onclick="filter('all', this)">All nutrients</button>
+  <button class="filter-btn" onclick="filter('mineral', this)">Minerals</button>
+  <button class="filter-btn" onclick="filter('vitamin', this)">Vitamins</button>
+  <button class="filter-btn" onclick="filter('fatty', this)">Omega-3s</button>
+  <button class="filter-btn" onclick="filter('protein', this)">Protein</button>
+  <span class="count-badge" id="count"></span>
+  <button class="print-btn" onclick="window.print()">🖨 Print cards</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const cards = [
+  {
+    category: "mineral",
+    name: "Iron",
+    decline: "Up to 50%",
+    declineLabel: "decline in fruit & veg\n(UK, 1940–2019)",
+    whatItDoes: "Carries oxygen in the blood. Without enough, your cells literally run low on air.",
+    daily: "Constant tiredness and weakness, shortness of breath on exertion, difficulty concentrating, frequent headaches, pale skin, brittle nails, hair loss, restless legs at night.",
+    longTerm: "Anaemia, weakened immune system leaving you more prone to infection, impaired brain development in children with irreversible effects, increased risk of heart complications if severe and untreated.",
+    source: "Gould et al. (2022) Int J Food Sci Nutr; NHS Inform; WHO"
+  },
+  {
+    category: "mineral",
+    name: "Magnesium",
+    decline: "Up to 35%",
+    declineLabel: "decline in fruit & veg\n(UK, 1940–2019)",
+    whatItDoes: "Involved in over 300 metabolic reactions. Regulates nerves, muscles, blood pressure, and blood sugar.",
+    daily: "Fatigue, muscle cramps and twitches, poor sleep, anxiety, low mood, headaches and migraines, inability to switch off — often mistaken for stress or burnout.",
+    longTerm: "Hypertension and raised cardiovascular disease risk, type 2 diabetes, osteoporosis, treatment-resistant depression, asthma. Deficiency compounds over time because low magnesium makes it harder to absorb other nutrients.",
+    source: "Gould et al. (2022); PMC review Magnesium Health Effects (2025); Cleveland Clinic"
+  },
+  {
+    category: "mineral",
+    name: "Copper",
+    decline: "Up to 49%",
+    declineLabel: "decline in fruit & veg\n(UK, 1940–2019)",
+    whatItDoes: "Essential for iron metabolism, forming connective tissue, healthy nerves, and enzymatic reactions throughout the body.",
+    daily: "Fatigue and weakness, poor wound healing, increased susceptibility to infection, numbness or tingling in hands and feet.",
+    longTerm: "Anaemia (copper is needed to use iron properly), osteoporosis and bone fragility, neurological damage — in severe cases resembling spinal cord disease — and impaired immune response.",
+    source: "Gould et al. (2022); ResearchGate Micronutrient Deficiency Syndrome"
+  },
+  {
+    category: "mineral",
+    name: "Calcium",
+    decline: "27%",
+    declineLabel: "decline in 12 common\nvegetables (1975–1997)",
+    whatItDoes: "Builds and maintains bones and teeth, enables muscle contraction, nerve signalling, and blood clotting.",
+    daily: "Muscle cramps, tingling or numbness in hands and feet, fatigue, difficulty sleeping, irregular heartbeat.",
+    longTerm: "Osteoporosis and fracture risk — particularly significant for women post-menopause — dental decay, high blood pressure, and increased risk of bowel cancer.",
+    source: "Kushi Institute analysis of USDA data"
+  },
+  {
+    category: "mineral",
+    name: "Zinc",
+    decline: "Significant\ndecline",
+    declineLabel: "in wheat grain since\n1968 (Rothamsted data)",
+    whatItDoes: "Essential for immune function, wound healing, taste and smell, cell growth, and reproductive health.",
+    daily: "Frequent colds and infections, slow wound healing, loss of taste or smell, skin problems, poor concentration, low energy.",
+    longTerm: "Impaired immune system, delayed growth and development in children, reduced fertility, increased susceptibility to chronic infection and inflammatory disease.",
+    source: "Fan et al. (2008); Rothamsted Research; Zhu et al. (2018)"
+  },
+  {
+    category: "mineral",
+    name: "Selenium",
+    decline: "Declining\nintake",
+    declineLabel: "across UK population\n(NDNS data, HSIS 2024)",
+    whatItDoes: "Protects cells from oxidative damage, supports thyroid function and immune response.",
+    daily: "Fatigue, brain fog, hair loss and brittle nails, frequent illness, low mood.",
+    longTerm: "Thyroid disorders, weakened immune system, elevated cardiovascular disease risk, and Keshan disease (a form of heart disease) in severe deficiency.",
+    source: "HSIS Decades of Decline (2024); NIH Office of Dietary Supplements"
+  },
+  {
+    category: "mineral",
+    name: "Iodine",
+    decline: "Declining\nintake",
+    declineLabel: "across UK population\n(NDNS data, HSIS 2024)",
+    whatItDoes: "Critical for thyroid hormone production, which governs metabolism, growth, and brain development.",
+    daily: "Unexplained weight gain, fatigue, feeling cold all the time, brain fog, depression, swollen neck (goitre).",
+    longTerm: "Hypothyroidism, goitre, developmental delays in children born to iodine-deficient mothers — including lower IQ — and raised risk of thyroid cancer.",
+    source: "HSIS Decades of Decline (2024); WHO iodine deficiency data"
+  },
+  {
+    category: "mineral",
+    name: "Potassium",
+    decline: "Declining\nintake",
+    declineLabel: "across UK population\n(NDNS data, HSIS 2024)",
+    whatItDoes: "Regulates fluid balance, muscle contractions including the heartbeat, and nerve signals.",
+    daily: "Muscle weakness and cramps, fatigue, heart palpitations, constipation, high blood pressure.",
+    longTerm: "Hypertension and significantly increased risk of stroke, kidney stones, and osteoporosis. Low potassium is one of the most under-recognised contributors to cardiovascular disease.",
+    source: "HSIS Decades of Decline (2024); British Heart Foundation; NHS"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin A",
+    decline: "21%",
+    declineLabel: "decline in 12 common\nvegetables (1975–1997)",
+    whatItDoes: "Essential for vision (especially night vision), immune function, skin health, and cell growth. Broccoli alone lost 56% of its vitamin A.",
+    daily: "Night blindness and difficulty adjusting to low light, dry skin and eyes, increased frequency of infections, slow wound healing.",
+    longTerm: "Increased susceptibility to respiratory infections and measles, anemia, squamous cell metaplasia (abnormal cell changes in tissues), and in children — irreversible vision damage.",
+    source: "Kushi Institute analysis; NIH ODS; Surman et al. (2020) Int J Mol Sci"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin C",
+    decline: "30%",
+    declineLabel: "decline in 12 common\nvegetables (1975–1997)",
+    whatItDoes: "Antioxidant, immune booster, collagen maker. Also essential for absorbing iron from plant foods.",
+    daily: "Fatigue, irritability, joint pain, slow wound healing, easy bruising, dry and rough skin, frequent colds.",
+    longTerm: "Scurvy in severe deficiency (fatigue, anaemia, bleeding gums), but even low-grade insufficiency weakens immunity, impairs collagen production — affecting skin, joints, blood vessels — and reduces iron absorption from the gut.",
+    source: "Kushi Institute analysis; NIH ODS; Cleveland Clinic"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin D",
+    decline: "Declining\nintake",
+    declineLabel: "across UK population\n(NDNS data, HSIS 2024)",
+    whatItDoes: "Regulates calcium absorption, immune function, mood, and muscle strength. Much of what the body needs comes from sunlight — but diet matters too.",
+    daily: "Bone and muscle aches, fatigue, low mood and depression, frequent infections, poor sleep.",
+    longTerm: "Osteomalacia (soft bones) and osteoporosis, heightened risk of autoimmune conditions, cardiovascular disease, type 2 diabetes, and seasonal depression. Deficiency is now one of the most common in the UK.",
+    source: "HSIS Decades of Decline (2024); NHS; Arthritis Research UK"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin E",
+    decline: "Significant\ndecline",
+    declineLabel: "in rice under elevated\nCO₂ (Zhu et al. 2018)",
+    whatItDoes: "Powerful antioxidant protecting cells from oxidative damage. Supports immune function and skin health.",
+    daily: "Muscle weakness, coordination difficulties, impaired vision, increased susceptibility to infection, dry skin.",
+    longTerm: "Peripheral neuropathy (nerve damage), retinal degeneration affecting vision, increased oxidative stress linked to heart disease and cancer risk, and impaired immune response over time.",
+    source: "Zhu et al. (2018) Science Advances; NIH ODS"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin B1\n(Thiamine)",
+    decline: "Significant\ndecline",
+    declineLabel: "in rice under elevated\nCO₂ (Zhu et al. 2018)",
+    whatItDoes: "Converts food into energy. Essential for nerve and muscle function.",
+    daily: "Fatigue, irritability, reduced reflexes, difficulty concentrating, loss of appetite.",
+    longTerm: "Beriberi (affecting heart, nerves and muscles), Wernicke-Korsakoff syndrome (a brain disorder involving memory loss and confusion) in severe deficiency. Long-term insufficiency impairs heart function.",
+    source: "Zhu et al. (2018); Healthline B-vitamin deficiency overview"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin B2\n(Riboflavin)",
+    decline: "Significant\ndecline",
+    declineLabel: "in rice under elevated\nCO₂ (Zhu et al. 2018)",
+    whatItDoes: "Key to energy production, processing fats, and maintaining healthy skin, eyes, and nerve function.",
+    daily: "Cracked lips and corners of mouth, sore throat, skin inflammation, sensitivity to light, fatigue.",
+    longTerm: "Anaemia, increased migraine frequency, impaired iron metabolism, and raised homocysteine levels — a risk factor for cardiovascular disease and cognitive decline.",
+    source: "Zhu et al. (2018); NIH ODS Riboflavin"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin B5\n(Pantothenic acid)",
+    decline: "Significant\ndecline",
+    declineLabel: "in rice under elevated\nCO₂ (Zhu et al. 2018)",
+    whatItDoes: "Used in virtually every metabolic process in the body. Synthesises hormones and metabolises nutrients.",
+    daily: "Fatigue, headache, irritability, impaired coordination, tingling or burning sensations in the feet, difficulty sleeping.",
+    longTerm: "Rarely studied in isolation but B5 deficiency impairs the adrenal glands and sustained low levels are associated with chronic fatigue, hormonal dysregulation, and metabolic dysfunction.",
+    source: "Zhu et al. (2018); NIH ODS Pantothenic Acid"
+  },
+  {
+    category: "vitamin",
+    name: "Vitamin B9\n(Folate)",
+    decline: "Significant\ndecline",
+    declineLabel: "in rice under elevated\nCO₂ (Zhu et al. 2018)",
+    whatItDoes: "Essential for DNA synthesis, red blood cell formation, and — critically — fetal development in early pregnancy.",
+    daily: "Fatigue, weakness, pallor, mouth ulcers, shortness of breath, low mood.",
+    longTerm: "Megaloblastic anaemia, neural tube defects in babies (spina bifida) if deficient in early pregnancy, raised homocysteine levels increasing heart disease risk, and impaired cognitive function. Around 10% of the UK population carries a genetic variant reducing folate uptake further.",
+    source: "Zhu et al. (2018); NHS Inform; Cleveland Clinic folate deficiency"
+  },
+  {
+    category: "fatty",
+    name: "Omega-3\nFatty Acids",
+    decline: "Declining\nintake",
+    declineLabel: "across UK population\n(NDNS data, HSIS 2024)",
+    whatItDoes: "The brain is 60% fat — much of it omega-3. Essential for brain function, heart health, joint lubrication, and managing inflammation throughout the body.",
+    daily: "Dry, rough skin, brittle nails and hair, joint stiffness and pain, poor concentration and brain fog, low mood, poor sleep, fatigue.",
+    longTerm: "Elevated cardiovascular disease risk (heart disease, stroke), cognitive decline and increased Alzheimer's risk, depression and anxiety, chronic inflammatory conditions including arthritis. Long-term deficiency accelerates ageing at the cellular level.",
+    source: "HSIS Decades of Decline (2024); Healthline; Vivo Life research summary"
+  },
+  {
+    category: "protein",
+    name: "Protein\n(in staple crops)",
+    decline: "10.3%",
+    declineLabel: "reduction in rice under\nelevated CO₂ (Zhu et al.)",
+    whatItDoes: "Every cell in the body is made of protein. Used for repair, immune function, enzymes, hormones, and transport molecules in the blood.",
+    daily: "Muscle weakness, slow recovery after exercise or illness, poor wound healing, swelling, brain fog, increased hunger.",
+    longTerm: "Muscle wasting (sarcopenia), weakened immune system, hormonal disruption, impaired organ function. In populations dependent on rice as a staple crop, a 10% protein reduction has population-scale health consequences.",
+    source: "Zhu et al. (2018) Science Advances; WHO protein requirements"
+  }
+];
+
+function getCatClass(cat) {
+  return {
+    mineral: 'cat-mineral',
+    vitamin: 'cat-vitamin',
+    fatty:   'cat-fatty',
+    protein: 'cat-protein'
+  }[cat] || 'cat-mineral';
+}
+function getCatLabel(cat) {
+  return {
+    mineral: 'Mineral',
+    vitamin: 'Vitamin',
+    fatty:   'Essential fatty acid',
+    protein: 'Macronutrient'
+  }[cat] || cat;
+}
+
+function renderCards() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  cards.forEach((c, i) => {
+    const catClass = getCatClass(c.category);
+    const wrap = document.createElement('div');
+    wrap.className = `card-wrap ${catClass}`;
+    wrap.dataset.cat = c.category;
+    wrap.dataset.index = i;
+    wrap.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="card-stripe"></div>
+          <div class="card-body">
+            <span class="card-category">${getCatLabel(c.category)}</span>
+            <div class="nutrient-name">${c.name.replace('\n', '<br>')}</div>
+            <div class="decline-figure">
+              <span class="decline-number">${c.decline.split('\n')[0]}</span>
+              <span class="decline-label">${c.declineLabel.replace('\n', '<br>')}</span>
+            </div>
+            <div class="card-divider"></div>
+            <p class="what-it-does">${c.whatItDoes}</p>
+          </div>
+          <div class="flip-hint">Tap to see health effects →</div>
+        </div>
+        <div class="card-back">
+          <div class="back-header">
+            <h3>${c.name.replace('\n', ' ')}</h3>
+            <div class="back-sub">Health effects of deficiency</div>
+          </div>
+          <div class="symptoms">
+            <div class="symptom-group">
+              <label>Day to day</label>
+              <p>${c.daily}</p>
+            </div>
+            <div class="symptom-group">
+              <label>Long term</label>
+              <p>${c.longTerm}</p>
+            </div>
+          </div>
+          <div class="source-line">Source: ${c.source}</div>
+        </div>
+      </div>`;
+    wrap.addEventListener('click', () => wrap.classList.toggle('flipped'));
+    grid.appendChild(wrap);
+  });
+  updateCount();
+}
+
+function filter(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card-wrap').forEach(w => {
+    if (cat === 'all' || w.dataset.cat === cat) {
+      w.classList.remove('hidden');
+      w.classList.remove('flipped');
+    } else {
+      w.classList.add('hidden');
+    }
+  });
+  updateCount();
+}
+
+function updateCount() {
+  const total = document.querySelectorAll('.card-wrap:not(.hidden)').length;
+  document.getElementById('count').textContent = `${total} card${total !== 1 ? 's' : ''} shown`;
+}
+
+renderCards();
+</script>
+</body>
+</html>
